@@ -49,9 +49,9 @@ def main():
 
 def checkInserts(command: str):
     inserts = {
-        "INSERTVAR": lambda a, b: a.replace(b, input(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES USER INPUT IN PLACE OF {colors.INPUT}{b}{colors.ENDC}:\n')),
+        "INSERTVAR": lambda a, b: a.replace(b, input(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES USER INPUT IN PLACE OF {colors.INPUT}{b}{colors.ENDC}: ')),
         "FILENAME": lambda a, b: a.replace(b, askopenfilename(initialdir="./files")),
-        "echo": lambda a, b: a.replace(b,f'{b} {colors.ECHO}')+colors.ENDC,
+        "echo": lambda a, b: (a.replace(b,f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a,
         #"FILENAME": lambda a, b: a.replace(b, print(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES FILE FOR {colors.INPUT}{b}{colors.WARNING} - SELECT FILE FROM DIRECTORY{colors.ENDC}{askopenfilename(initialdir="./files")}')),
     }
     for insert in inserts.keys():
@@ -62,7 +62,8 @@ def checkInserts(command: str):
 
 def runCommand(command: str):
     try:
-        print(f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
+        if command[0:4] != "echo":
+            print(f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
         subprocess.run([command], shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(e)

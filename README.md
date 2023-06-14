@@ -22,7 +22,7 @@ python main.py
 
 A commands .txt file should include commands to be run line by line </br>
 ##### Example run of example.txt commands file
-![image](https://github.com/kujuh3/cmd-runner/assets/66220187/74e9a67d-ead0-446b-acbe-e6802c546520)
+![image](https://github.com/kujuh3/cmd-runner/assets/66220187/850c3873-3e34-4f85-84a1-9192dee9b4d2)
 
 ##### Example run of insert_example.txt commands file
-![image](https://github.com/kujuh3/cmd-runner/assets/66220187/c0f34aff-4eb8-4c3d-841d-94e2e311308a)
+![image](https://github.com/kujuh3/cmd-runner/assets/66220187/3d739ce7-3ba7-4c4d-936a-8f179bd921be)

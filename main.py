@@ -1,7 +1,13 @@
 import subprocess
 import csv
 from tkinter.filedialog import askopenfilename
-from os import getcwd, listdir, path
+from os import getcwd, listdir, path, mkdir
+
+filepath = path.dirname(path.realpath(__file__))
+
+#Make directories if they don't exist
+mkdir(f'{filepath}/commands') if path.isdir(f'{filepath}/commands') == False else None
+mkdir(f'{filepath}/files') if path.isdir(f'{filepath}/files') == False else None
 
 class colors:
     COMMAND = '\033[94m'

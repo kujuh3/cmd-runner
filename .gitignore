@@ -1,3 +1,4 @@
 .vscode
 components/__pycache__
 commands/
+files/

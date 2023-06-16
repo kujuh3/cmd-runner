@@ -2,80 +2,108 @@ import subprocess
 import csv
 from tkinter.filedialog import askopenfilename
 from os import getcwd, listdir, path, mkdir
+import components.configHandler as configHandler
+from components.colors import colors
+
+try:
+    import readline
+    readline.parse_and_bind("tab: complete")
+except:
+    pass
 
 filepath = path.dirname(path.realpath(__file__))
+commandfiles = [x.replace(".txt", "") for x in listdir(f'{filepath}/commands')]
+config = configHandler.loadConfig(filepath)
 
-#Make directories if they don't exist
+# Make directories if they don't exist
 mkdir(f'{filepath}/commands') if path.isdir(f'{filepath}/commands') == False else None
 mkdir(f'{filepath}/files') if path.isdir(f'{filepath}/files') == False else None
 
-class colors:
-    COMMAND = '\033[94m'
-    WARNING = '\033[93m'
-    ENDC = '\033[0m'
-    INPUT = '\033[96m'
-    ECHO = '\033[31m'
-    OK = '\033[92m'
+
+def autoComplete(text, state):
+    possibles = [str(x) for x in commandfiles if x.startswith(text)]
+    if state < len(possibles):
+        return possibles[state]
+    else:
+        return None
+
+
+readline.set_completer(autoComplete)
 
 
 def menu():
     while True:
         try:
             option = int(input('''
-What u wants to dos:
-    1. Run commands
-    2. Remove rows from CSV
-    3. Quit
-'''))
+1. Run commands
+2. Remove rows from CSV
+3. New Config
+4. Quit
+
+What u wants to dos: '''))
             match option:
                 case 1:
-                    main()
+                    commandFile()
                 case 2:
-                    stripLines()
+                    stripRows()
                 case 3:
+                    configHandler.addConfig(filepath)
+                case 4:
                     quit()
         except ValueError:
             print(f"{colors.ECHO}Bruh{colors.ENDC}")
 
-
-def main():
-    filename = input(
-        f'\n{colors.INPUT}Input name of command file{colors.ENDC}: ')
-    commands = []
-    try:
-        with open(f"./commands/{filename}.txt") as file:
-            for line in file:
-                commands.append(line.strip('\n'))
-        for command in commands:
-            checked_command = checkInserts(command)
-            runCommand(checked_command)
-    except Exception as e:
-        print(e)
+# Function for handling command files
 
 
+def commandFile():
+    while True:
+        try:
+            filename = input(
+                f'\n{colors.INPUT}Input name of command file{colors.ENDC}: ')
+            commands = []
+            with open(f"./commands/{filename}.txt") as file:
+                for line in file:
+                    commands.append(line.strip('\n'))
+            for command in commands:
+                checked_command = checkInserts(command)
+                runCommand(checked_command)
+            break
+        except Exception as e:
+            print(e)
+
+
+# Function for checking possible inserts in command strings
 def checkInserts(command: str):
     inserts = {
         "INSERTVAR": lambda a, b: a.replace(b, input(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES USER INPUT IN PLACE OF {colors.INPUT}{b}{colors.ENDC}: ')),
         "FILENAME": lambda a, b: a.replace(b, askopenfilename(initialdir="./files")),
-        "echo": lambda a, b: (a.replace(b,f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a,
-        #"FILENAME": lambda a, b: a.replace(b, print(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES FILE FOR {colors.INPUT}{b}{colors.WARNING} - SELECT FILE FROM DIRECTORY{colors.ENDC}{askopenfilename(initialdir="./files")}')),
+        "echo": lambda a, b: (a.replace(b, f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a,
+        # "FILENAME": lambda a, b: a.replace(b, print(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES FILE FOR {colors.INPUT}{b}{colors.WARNING} - SELECT FILE FROM DIRECTORY{colors.ENDC}{askopenfilename(initialdir="./files")}')),
     }
     for insert in inserts.keys():
         if insert in command:
             return inserts[insert](command, insert)
     return command
 
+# Functio for running commands in shell
+
 
 def runCommand(command: str):
     try:
         if command[0:4] != "echo":
-            print(f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
-        subprocess.run([command], shell=True, check=True)
+            print(
+                f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
+        commandrun = subprocess.run(
+            [command], shell=True, check=True, capture_output=True)
+        print(commandrun.stdout.decode("utf-8"))
     except subprocess.CalledProcessError as e:
         print(e)
 
+# Function for stripping rows from csv
 
-def stripLines():
+
+def stripRows():
     try:
         # print(f'\n{colors.WARNING}FILES IN FOLDER:')
         # for x in listdir("./files"):
@@ -85,11 +113,13 @@ def stripLines():
 #         file = input(f'''
 # {colors.WARNING}File has to be in /files folder{colors.ENDC}
 # Input just the name of the file to remove rows from (Ex: thisfile):
-# ''')  
+# ''')
         while True:
             try:
-                start = int(input(f'\n{colors.INPUT}Keep rows starting from{colors.ENDC}: '))-1
-                end = int(input(f'{colors.INPUT}Keep rows ending to{colors.ENDC}: '))-1
+                start = int(
+                    input(f'\n{colors.INPUT}Keep rows starting from{colors.ENDC}: '))-1
+                end = int(
+                    input(f'{colors.INPUT}Keep rows ending to{colors.ENDC}: '))-1
                 break
             except ValueError:
                 print(f"{colors.ECHO}Bruh{colors.ENDC}")

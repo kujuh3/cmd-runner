@@ -1,0 +1,2 @@
+echo this is conditional print
+echo See the conditional print was skipped due to conditions "main.py" and "conditions.json" being met from command "dir"

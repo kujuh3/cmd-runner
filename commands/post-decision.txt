@@ -1,4 +1,0 @@
-echo REMEMBER TO DISABLE VPN FOR THIS ACTION
-zkubectl login zonartooling
-zkubectl cluster-access request Post-decision-changes
-zonar on-call override-pnd-decisions FILENAME -e PROD --override

@@ -1,7 +1,6 @@
 ## Runner
 
 Meant to be run on linux - probably hangs on windows due to tkinter.
-Designed for WSL
 
 ### Installation
 Install tkinter via apt

@@ -5,15 +5,9 @@ from os import getcwd, listdir, path, mkdir
 import components.configHandler as configHandler
 from components.colors import colors
 
-try:
-    import readline
-    readline.parse_and_bind("tab: complete")
-except:
-    pass
-
 filepath = path.dirname(path.realpath(__file__))
 commandfiles = [x.replace(".txt", "") for x in listdir(f'{filepath}/commands')]
-config = configHandler.loadConfig(filepath)
+config, indexes = configHandler.loadConfig(filepath)
 
 # Make directories if they don't exist
 mkdir(f'{filepath}/commands') if path.isdir(f'{filepath}/commands') == False else None
@@ -27,20 +21,23 @@ def autoComplete(text, state):
     else:
         return None
 
-
-readline.set_completer(autoComplete)
-
+try:
+    import readline
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(autoComplete)
+except:
+    pass
 
 def menu():
     while True:
         try:
-            option = int(input('''
-1. Run commands
-2. Remove rows from CSV
-3. New Config
-4. Quit
+            option = int(input(f'''
+{colors.WARNING}1. {colors.INPUT}Run commands
+{colors.WARNING}2. {colors.INPUT}Remove rows from CSV
+{colors.WARNING}3. {colors.INPUT}New Config
+{colors.WARNING}4. {colors.INPUT}Quit{colors.ENDC}
 
-What u wants to dos: '''))
+Whats u wants to dos: '''))
             match option:
                 case 1:
                     commandFile()
@@ -67,7 +64,7 @@ def commandFile():
                     commands.append(line.strip('\n'))
             for command in commands:
                 checked_command = checkInserts(command)
-                runCommand(checked_command)
+                runCommand(checked_command) if checked_command else None
             break
         except Exception as e:
             print(e)
@@ -78,25 +75,61 @@ def checkInserts(command: str):
     inserts = {
         "INSERTVAR": lambda a, b: a.replace(b, input(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES USER INPUT IN PLACE OF {colors.INPUT}{b}{colors.ENDC}: ')),
         "FILENAME": lambda a, b: a.replace(b, askopenfilename(initialdir="./files")),
-        "echo": lambda a, b: (a.replace(b, f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a,
+        "echo": lambda a, b: (a.replace(b, f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a
         # "FILENAME": lambda a, b: a.replace(b, print(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES FILE FOR {colors.INPUT}{b}{colors.WARNING} - SELECT FILE FROM DIRECTORY{colors.ENDC}{askopenfilename(initialdir="./files")}')),
     }
+    if checkConditions(command):
+        return False
     for insert in inserts.keys():
         if insert in command:
             return inserts[insert](command, insert)
     return command
 
+
+def checkConditions(command: str):
+    conditionWasMet = False
+
+    for cmd in indexes.keys():
+        if cmd in command:
+            configObject = config[indexes[cmd]]
+            print(f'''
+{colors.WARNING}Condition was present for command {colors.COMMAND}{command}{colors.WARNING}... 
+Checking for conditions({colors.COMMAND}{configObject["condition"]}{colors.WARNING}) from{colors.COMMAND} {configObject["depends"]}{colors.ENDC}:''')
+            try:
+                commandrun = subprocess.run(
+                    [configObject["depends"]], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                stdout = commandrun.stdout.decode('utf-8').split("\n")
+                print(
+                    f'{colors.INPUT}{commandrun.stdout.decode("utf-8")}{colors.ENDC}')
+                for line in stdout:
+                    for i in range(len(configObject["condition"])):
+                        # print(i+1, configObject["condition"]
+                        #       [i], len(configObject["condition"]))
+                        if configObject["condition"][i] in line:
+                            conditionWasMet = True
+                        else:
+                            conditionWasMet = False
+                            break
+                    if conditionWasMet:
+                        print(
+                            f'{colors.OK}Condition(s) were met. Skipping {colors.COMMAND}{command}{colors.OK}!{colors.ENDC}')
+                        return conditionWasMet
+                print(
+                    f'{colors.ECHO}Condition(s) were not met. Continuing with {colors.COMMAND}{command}{colors.ENDC}')
+                return conditionWasMet
+            except subprocess.CalledProcessError as e:
+                print(e)
+
+
 # Functio for running commands in shell
-
-
 def runCommand(command: str):
     try:
         if command[0:4] != "echo":
             print(
                 f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
         commandrun = subprocess.run(
-            [command], shell=True, check=True, capture_output=True)
-        print(commandrun.stdout.decode("utf-8"))
+            [command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(commandrun.stdout.decode('utf-8'))
     except subprocess.CalledProcessError as e:
         print(e)
 

@@ -1,0 +1,11 @@
+[
+    {
+        "name": "Condition example",
+        "command": "echo this is conditional print",
+        "depends": "dir",
+        "condition": [
+            "main.py",
+            "conditions.json"
+        ]
+    }
+]

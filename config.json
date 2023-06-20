@@ -1,8 +1,0 @@
-[
-    {
-        "name" : "Test",
-        "command" : "echo",
-        "depends" : "echo This was a test",
-        "condition" :  ["test"]
-    }
-]

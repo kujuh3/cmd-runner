@@ -2,6 +2,8 @@
 
 Meant to be run on linux - probably hangs on windows due to tkinter.
 
+Includes an auto-completer for command files:
+Any file in the /commands folder can be autocompleted when choosing a command file to run by pressing tab
 ### Installation
 Install tkinter via apt
 ```bash
@@ -25,3 +27,7 @@ A commands .txt file should include commands to be run line by line </br>
 
 ##### Example run of insert_example.txt commands file
 ![image](https://github.com/kujuh3/cmd-runner/assets/66220187/3d739ce7-3ba7-4c4d-936a-8f179bd921be)
+
+##### Example run of series of commands where a condition is present
+![image](https://github.com/kujuh3/cmd-runner/assets/66220187/93f3c3c0-f4f3-4374-9f8f-73eeb4e0799d)
+

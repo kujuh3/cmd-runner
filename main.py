@@ -128,8 +128,7 @@ def runCommand(command: str):
             print(
                 f'\n{colors.INPUT}Running command {colors.COMMAND}{command}{colors.ENDC}')
         commandrun = subprocess.run(
-            [command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(commandrun.stdout.decode('utf-8'))
+            [command], shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(e)
 

@@ -59,7 +59,7 @@ def commandFile():
             filename = input(
                 f'\n{colors.INPUT}Input name of command file{colors.ENDC}: ')
             commands = []
-            with open(f"./commands/{filename}.txt") as file:
+            with open(f"{filepath}/commands/{filename}.txt") as file:
                 for line in file:
                     commands.append(line.strip('\n'))
             for command in commands:
@@ -74,7 +74,7 @@ def commandFile():
 def checkInserts(command: str):
     inserts = {
         "INSERTVAR": lambda a, b: a.replace(b, input(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES USER INPUT IN PLACE OF {colors.INPUT}{b}{colors.ENDC}: ')),
-        "FILENAME": lambda a, b: a.replace(b, askopenfilename(initialdir="./files")),
+        "FILENAME": lambda a, b: a.replace(b, askopenfilename(initialdir=filepath+"/files")),
         "echo": lambda a, b: (a.replace(b, f'{b} {colors.ECHO}')+colors.ENDC) if (a[0:4] == "echo") else a
         # "FILENAME": lambda a, b: a.replace(b, print(f'\n{colors.WARNING}COMMAND {colors.COMMAND}{a} {colors.WARNING}REQUIRES FILE FOR {colors.INPUT}{b}{colors.WARNING} - SELECT FILE FROM DIRECTORY{colors.ENDC}{askopenfilename(initialdir="./files")}')),
     }
@@ -140,7 +140,7 @@ def stripRows():
         # print(f'\n{colors.WARNING}FILES IN FOLDER:')
         # for x in listdir("./files"):
         #     print(f'{colors.INPUT}{x}')
-        file = askopenfilename(initialdir='./files')
+        file = askopenfilename(initialdir=filepath+'/files')
         filename = path.basename(file.replace(".csv", ""))
 #         file = input(f'''
 # {colors.WARNING}File has to be in /files folder{colors.ENDC}
@@ -156,7 +156,7 @@ def stripRows():
             except ValueError:
                 print(f"{colors.ECHO}Bruh{colors.ENDC}")
 
-        with open(file) as inp, open(f'{getcwd()}/files/{filename}_clean.csv', 'w') as out:
+        with open(file) as inp, open(f'{filepath}/files/{filename}_clean.csv', 'w') as out:
             tbw = csv.writer(out)
             for i, row in enumerate(csv.reader(inp)):
                 if i >= start and i <= end or i == 0:
